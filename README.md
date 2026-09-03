@@ -16,3 +16,9 @@ Requisitos
 5. O projeto deve utilizar os princípios de TDD.
 6. O projeto deve ter o deploy feito em um EC2 na AWS.
 7. Para gerar o banco de dados, utilize o script disponível aqui
+
+```
+docker cp banco.sql mysql-imoveis:/banco.sql
+docker exec mysql-imoveis sh -c "mysql -uroot -psenha123 imoveis_db < /banco.sql"
+docker exec mysql-imoveis mysql -uroot -psenha123 imoveis_db -e "SELECT * FROM imoveis;"
+```d

@@ -1,0 +1,19 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: mysql-imoveis
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: senha123
+      MYSQL_DATABASE: imoveis_db
+
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./banco.sql:/docker-entrypoint-initdb.d/01-banco.sql:ro
+
+volumes:
+  mysql_data:

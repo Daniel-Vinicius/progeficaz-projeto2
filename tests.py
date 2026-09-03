@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
+
 from server import app
 
 
@@ -17,13 +18,15 @@ def mock_db():
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
 
-        mock_conn.cursor.return_value = mock_cursor
+        # Configura o cursor usado dentro do `with`
+        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
+
         mock_conectar.return_value = mock_conn
 
         yield mock_conectar, mock_conn, mock_cursor
 
 
-def test_list_imoveis(client, mock_db):
+def test_lista_imoveis_vazia(client, mock_db):
     _, mock_conn, mock_cursor = mock_db
     mock_cursor.fetchall.return_value = []
 
@@ -32,43 +35,23 @@ def test_list_imoveis(client, mock_db):
     assert response.status_code == 200
     assert response.get_json() == []
 
+    mock_cursor.execute.assert_called_once_with("SELECT * FROM imoveis")
+    mock_cursor.fetchall.assert_called_once()
+    mock_conn.close.assert_called_once()
+
+
+def test_lista_imoveis_com_registros(client, mock_db):
+    _, mock_conn, mock_cursor = mock_db
+
+    # Com DictCursor, o MySQL devolve dicionários.
     mock_cursor.fetchall.return_value = [
-      (
-        1,
-        "Nicole Common",
-        "Travessa",
-        "Lake Danielle",
-        "Judymouth",
-        85184,
-        "casa em condominio",
-        488423.52,
-        "2017-07-29"
-      ),
-      (
-          2,
-          "Price Prairie",
-          "Travessa",
-          "Colonton",
-          "North Garyville",
-          93354,
-          "casa em condominio",
-          260069.89,
-          "2021-11-30"
-      ),
-    ]
-
-    mock_cursor.execute.assert_called_once_with(
-        "SELECT id, logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao FROM imoveis"
-    )
-
-    assert response.get_json() == [
         {
             "id": 1,
             "logradouro": "Nicole Common",
             "tipo_logradouro": "Travessa",
             "bairro": "Lake Danielle",
             "cidade": "Judymouth",
-            "cep": 85184,
+            "cep": "85184",
             "tipo": "casa em condominio",
             "valor": 488423.52,
             "data_aquisicao": "2017-07-29",
@@ -79,16 +62,18 @@ def test_list_imoveis(client, mock_db):
             "tipo_logradouro": "Travessa",
             "bairro": "Colonton",
             "cidade": "North Garyville",
-            "cep": 93354,
+            "cep": "93354",
             "tipo": "casa em condominio",
             "valor": 260069.89,
             "data_aquisicao": "2021-11-30",
         },
     ]
 
+    response = client.get("/imoveis")
+
+    assert response.status_code == 200
+    assert response.get_json() == mock_cursor.fetchall.return_value
+
+    mock_cursor.execute.assert_called_once_with("SELECT * FROM imoveis")
     mock_cursor.fetchall.assert_called_once()
-    mock_cursor.close.assert_called_once()
     mock_conn.close.assert_called_once()
-
-
-# "SELECT id, logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao FROM imoveis WITH id = "
