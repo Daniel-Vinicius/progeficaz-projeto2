@@ -70,5 +70,31 @@ def add_imovel():
     finally:
         conexao.close()
 
+@app.put("/imoveis/<id>")
+def update_imovel(id):
+    dados = request.json or {}
+
+    if "logradouro" not in dados or "tipo_logradouro" not in dados or "bairro" not in dados or "cidade" not in dados or "cep" not in dados or "tipo" not in dados or "valor" not in dados or "data_aquisicao" not in dados:
+        return jsonify({"erro": "Campos obrigatórios: logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao"}), 400
+
+    conexao = conectar_banco()
+    try:
+        with conexao.cursor() as cursor:
+          cursor.execute(
+            "UPDATE imoveis SET logradouro = %s, tipo_logradouro = %s, bairro = %s, cidade = %s, cep = %s, tipo = %s, valor = %s, data_aquisicao = %s WHERE id = %s",
+            (dados["logradouro"], dados["tipo_logradouro"], dados["bairro"], dados["cidade"], dados["cep"], dados["tipo"], dados["valor"], dados["data_aquisicao"], int(id)),
+        )
+        conexao.commit()
+        
+        linhas = cursor.rowcount
+        
+        if linhas == 0:
+            return jsonify({"erro": "Property not found"}), 404
+
+        return jsonify({"mensagem": "Property updated successfully"}), 200
+
+    finally:
+        conexao.close()
+
 if __name__ == "__main__":
     app.run(debug=True)
