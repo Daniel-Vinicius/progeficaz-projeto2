@@ -101,3 +101,8 @@ def test_find_imovel_by_id(client, mock_db):
     mock_cursor.fetchone.assert_called_once()
     mock_conn.close.assert_called_once()
 
+    mock_cursor.fetchone.return_value = None
+    response = client.get("/imoveis/2100")
+    assert response.status_code == 404
+
+

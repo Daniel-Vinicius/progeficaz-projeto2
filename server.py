@@ -33,8 +33,10 @@ def find_imovel_by_id(id):
         with conexao.cursor() as cursor:
             cursor.execute("SELECT * FROM imoveis WHERE id = %s", (int(id),))
             imovel = cursor.fetchone()
+            if not imovel:
+                return {"message": "Property not found"}, 404
 
-        return jsonify(imovel)
+        return jsonify(imovel), 200
 
     finally:
         conexao.close()
