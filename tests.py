@@ -105,4 +105,42 @@ def test_find_imovel_by_id(client, mock_db):
     response = client.get("/imoveis/2100")
     assert response.status_code == 404
 
+def test_add_imovel(client, mock_db):
+    _, mock_conn, mock_cursor = mock_db
+    mock_cursor.lastrowid = 1002
+    
+    novo_imovel = {
+        "id": 1002, # nao é definido pela request, e sim pelo lastrowid, so coloquei aqui pra facilitar o assert
+        "logradouro": "Price Prairie",
+        "tipo_logradouro": "Travessa",
+        "bairro": "Colonton",
+        "cidade": "North Garyville",
+        "cep": "93354",
+        "tipo": "casa em condominio",
+        "valor": 260069.89,
+        "data_aquisicao": "2021-11-30",
+    }
 
+    response = client.post("/imoveis", json=novo_imovel)
+
+    mock_cursor.execute.assert_called_once_with(
+                """
+                INSERT INTO imoveis
+                    (logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao)
+                VALUES
+                    (%s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    novo_imovel["logradouro"], novo_imovel["tipo_logradouro"], novo_imovel["bairro"], novo_imovel["cidade"], novo_imovel["cep"], novo_imovel["tipo"], novo_imovel["valor"], novo_imovel["data_aquisicao"]
+                )
+            )
+    mock_conn.close.assert_called_once()
+
+    assert response.get_json() == novo_imovel
+    assert response.status_code == 201
+
+def test_add_imovel_campos_faltantes(client, mock_db):
+    response = client.post("/imoveis", json={})
+
+    assert response.get_json() == {"erro": "Campos obrigatórios: logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao"}
+    assert response.status_code == 400

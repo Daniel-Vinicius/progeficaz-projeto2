@@ -27,5 +27,5 @@ docker exec mysql-imoveis mysql -uroot -psenha123 imoveis_db -e "SELECT * FROM i
 git commit -m "MENSAGEM
 
 Co-authored-by: Daniel Vinícius <daniel.vinicius.sviana@gmail.com>
-Co-authored-by: Pedro Souza <pedrohbzs@al.insper.edu.br>
+Co-authored-by: Pedro Souza <pedrohbzs@al.insper.edu.br>"
 ```
