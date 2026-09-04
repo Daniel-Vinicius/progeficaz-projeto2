@@ -144,3 +144,34 @@ def test_add_imovel_campos_faltantes(client, mock_db):
 
     assert response.get_json() == {"erro": "Campos obrigatórios: logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao"}
     assert response.status_code == 400
+
+def test_atualizar_imovel(client, mock_db):
+    _, mock_conn, mock_cursor = mock_db
+    mock_cursor.rowcount = 1
+
+    response = client.put(
+        "/imoveis/1",
+        json={
+            "logradouro": "Caleb Heights ATUALIZADO",
+            "tipo_logradouro":"Travessa",
+            "bairro":"Lake Charles",
+            "cidade":"Youngport",
+            "cep":"48943",
+            "tipo":"apartamento",
+            "valor": 86254.13,
+            "data_aquisicao": "2022-07-27",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.get_json() == {
+        "mensagem": "Imovel atualizado com sucesso"
+    }
+
+    mock_cursor.execute.assert_called_once_with(
+        "UPDATE imoveis SET logradouro = %s, tipo_logradouro = %s, bairro = %s, cidade = %s, cep = %s, tipo = %s, valor = %s, data_aquisicao = %s WHERE id = %s",
+        ('Caleb Heights ATUALIZADO', 'Travessa', 'Lake Charles', 'Youngport', '48943', 'apartamento', 86254.13, '2022-07-27', 1),
+    )
+    mock_conn.commit.assert_called_once()
+    mock_cursor.close.assert_called_once()
+    mock_conn.close.assert_called_once()
