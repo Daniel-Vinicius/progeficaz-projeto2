@@ -209,3 +209,9 @@ def test_delete_property(client, mock_db):
     mock_cursor.execute.assert_called_once_with("DELETE FROM imoveis WHERE id = %s", (1,))
     mock_conn.commit.assert_called_once()
     mock_conn.close.assert_called_once()
+
+def test_delete_non_existent_property(client, mock_db):
+    _, mock_conn, mock_cursor = mock_db
+    mock_cursor.rowcount = 0
+    response = client.delete("/imoveis/1")
+    assert response.status_code == 404

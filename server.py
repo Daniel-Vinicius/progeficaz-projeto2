@@ -96,5 +96,22 @@ def update_imovel(id):
     finally:
         conexao.close()
 
+@app.delete("/imoveis/<id>")
+def delete_imovel(id):
+    conexao = conectar_banco()
+    try:
+        with conexao.cursor() as cursor:
+            cursor.execute("DELETE FROM imoveis WHERE id = %s", (int(id),))
+            conexao.commit()
+            linhas = cursor.rowcount
+
+        if linhas == 0:
+            return jsonify({"erro": "Property not found"}), 404
+
+        return jsonify({"mensagem": "Property deleted successfully"}), 204
+
+    finally:
+        conexao.close()
+
 if __name__ == "__main__":
     app.run(debug=True)
