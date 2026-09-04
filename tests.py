@@ -215,3 +215,122 @@ def test_delete_non_existent_property(client, mock_db):
     mock_cursor.rowcount = 0
     response = client.delete("/imoveis/1")
     assert response.status_code == 404
+
+def test_search_property_by_type(client, mock_db):
+    _, mock_conn, mock_cursor = mock_db
+
+    mock_cursor.fetchall.return_value = [
+        {
+            "id": 1,
+            "logradouro": "Nicole Common",
+            "tipo_logradouro": "Travessa",
+            "bairro": "Lake Danielle",
+            "cidade": "Judymouth",
+            "cep": "85184",
+            "tipo": "apartamento",
+            "valor": 488423.52,
+            "data_aquisicao": "2017-07-29",
+        },
+        {
+            "id": 2,
+            "logradouro": "Price Prairie",
+            "tipo_logradouro": "Travessa",
+            "bairro": "Colonton",
+            "cidade": "North Garyville",
+            "cep": "93354",
+            "tipo": "apartamento",
+            "valor": 260069.89,
+            "data_aquisicao": "2021-11-30",
+        },
+    ]
+
+    response = client.get("/imoveis", query_string={"tipo": "apartamento"})
+    assert response.status_code == 200
+    assert response.get_json() == [
+        {
+            "id": 1,
+            "logradouro": "Nicole Common",
+            "tipo_logradouro": "Travessa",
+            "bairro": "Lake Danielle",
+            "cidade": "Judymouth",
+            "cep": "85184",
+            "tipo": "apartamento",
+            "valor": 488423.52,
+            "data_aquisicao": "2017-07-29",
+        },
+        {
+            "id": 2,
+            "logradouro": "Price Prairie",
+            "tipo_logradouro": "Travessa",
+            "bairro": "Colonton",
+            "cidade": "North Garyville",
+            "cep": "93354",
+            "tipo": "apartamento",
+            "valor": 260069.89,
+            "data_aquisicao": "2021-11-30",
+        },
+    ]
+# create a test for serching properties by city
+def test_search_property_by_city(client, mock_db):
+    _, mock_conn, mock_cursor = mock_db
+
+    mock_cursor.fetchall.return_value = [
+        {
+            "id": 1,
+            "logradouro": "Nicole Common",
+            "tipo_logradouro": "Travessa",
+            "bairro": "Lake Danielle",
+            "cidade": "Judymouth",
+            "cep": "85184",
+            "tipo": "casa em condominio",
+            "valor": 488423.52,
+            "data_aquisicao": "2017-07-29",
+        },
+        {
+            "id": 2,
+            "logradouro": "Price Prairie",
+            "tipo_logradouro": "Travessa",
+            "bairro": "Colonton",
+            "cidade": "North Garyville",
+            "cep": "93354",
+            "tipo": "apartamento",
+            "valor": 260069.89,
+            "data_aquisicao": "2021-11-30",
+        },
+    ]
+
+    response = client.get("/imoveis", query_string={"cidade": "North Garyville"})
+    assert response.status_code == 200
+    assert response.get_json() ==  mock_cursor.fetchall.return_value
+#test for searching by property type and city
+def test_search_property_by_type_city(client, mock_db):
+    _, mock_conn, mock_cursor = mock_db
+
+    mock_cursor.fetchall.return_value = [
+        {
+            "id": 1,
+            "logradouro": "Nicole Common",
+            "tipo_logradouro": "Travessa",
+            "bairro": "Lake Danielle",
+            "cidade": "Judymouth",
+            "cep": "85184",
+            "tipo": "apartamento",
+            "valor": 488423.52,
+            "data_aquisicao": "2017-07-29",
+        },
+        {
+            "id": 2,
+            "logradouro": "Price Prairie",
+            "tipo_logradouro": "Travessa",
+            "bairro": "Colonton",
+            "cidade": "North Garyville",
+            "cep": "93354",
+            "tipo": "apartamento",
+            "valor": 260069.89,
+            "data_aquisicao": "2021-11-30",
+        },
+    ]
+
+    response = client.get("/imoveis", query_string={"tipo": "apartamento", "cidade": "North Garyville"})
+    assert response.status_code == 200
+    assert response.get_json() == mock_cursor.fetchall.return_value 
