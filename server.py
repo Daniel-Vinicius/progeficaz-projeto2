@@ -26,5 +26,18 @@ def index():
     finally:
         conexao.close()
 
+@app.get("/imoveis/<id>")
+def find_imovel_by_id(id):
+    conexao = conectar_banco()
+    try:
+        with conexao.cursor() as cursor:
+            cursor.execute("SELECT * FROM imoveis WHERE id = %s", (int(id),))
+            imovel = cursor.fetchone()
+
+        return jsonify(imovel)
+
+    finally:
+        conexao.close()
+
 if __name__ == "__main__":
     app.run(debug=True)

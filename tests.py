@@ -97,7 +97,7 @@ def test_find_imovel_by_id(client, mock_db):
     assert response.status_code == 200
     assert response.get_json() == mock_cursor.fetchone.return_value
 
-    mock_cursor.execute.assert_called_once_with("SELECT * FROM imoveis where id = ?", (2,))
+    mock_cursor.execute.assert_called_once_with("SELECT * FROM imoveis WHERE id = %s", (2,))
     mock_cursor.fetchone.assert_called_once()
     mock_conn.close.assert_called_once()
 
