@@ -198,3 +198,14 @@ def test_update_imovel_nao_existente(client, mock_db):
 
     assert response.get_json() == {"erro": "Property not found"}
     assert response.status_code == 404
+
+def test_delete_property(client, mock_db):
+    _, mock_conn, mock_cursor = mock_db
+    mock_cursor.rowcount = 1
+
+    response = client.delete("/imoveis/1")
+    assert response.status_code == 204
+
+    mock_cursor.execute.assert_called_once_with("DELETE FROM imoveis WHERE id = %s", (1,))
+    mock_conn.commit.assert_called_once()
+    mock_conn.close.assert_called_once()
