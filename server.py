@@ -16,15 +16,26 @@ def conectar_banco():
 @app.get("/imoveis")
 def index():
     conexao = conectar_banco()
+    cidade = request.args.get("cidade")
+    tipo = request.args.get("tipo")
+    
     try:
         with conexao.cursor() as cursor:
-            cursor.execute("SELECT * FROM imoveis")
+            if cidade and tipo:
+                cursor.execute("SELECT * FROM imoveis WHERE cidade = %s AND tipo = %s", (cidade, tipo))
+            elif cidade:
+                cursor.execute("SELECT * FROM imoveis WHERE cidade = %s", (cidade,))
+            elif tipo:
+                cursor.execute("SELECT * FROM imoveis WHERE tipo = %s", (tipo,))
+            else:
+                cursor.execute("SELECT * FROM imoveis")
             imoveis = cursor.fetchall()
 
         return jsonify(imoveis)
 
     finally:
         conexao.close()
+
 
 @app.get("/imoveis/<id>")
 def find_imovel_by_id(id):
